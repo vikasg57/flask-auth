@@ -13,7 +13,6 @@ def homepage():
     return render_template("homepage.html")
 
 
-
 @app.route("/dashboard")
 def dashboard():
     if "access_token" in session:
@@ -21,18 +20,66 @@ def dashboard():
     return redirect(url_for("login"))
 
 
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         password = request.form['password']
+#         response = SupabaseHandler().do_login(email, password)
+#
+#         if response.get('session') and response.get('session').get('access_token'):
+#             access_token = response.get('session') and response.get('session').get('access_token')
+#             session['access_token'] = access_token
+#             return redirect(url_for('dashboard'))
+#     return render_template('login.html', title='Home', name='User')
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error_message = None
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        response = SupabaseHandler().do_login(email, password)
+        try:
+            response = SupabaseHandler().do_login(email, password)
 
-        if response.get('session') and response.get('session').get('access_token'):
-            access_token = response.get('session') and response.get('session').get('access_token')
-            session['access_token'] = access_token
-            return redirect(url_for('dashboard'))
-    return render_template('login.html', title='Home', name='User')
+            if response.get('session') and response.get('session').get('access_token'):
+                access_token = response['session']['access_token']
+                session['access_token'] = access_token
+                return redirect(url_for('dashboard'))
+            else:
+                error_message = "Invalid email or password. Please try again."
+        except Exception as e:
+            error_message = f"An error occurred: {str(e)}"
+
+    return render_template('login.html', title='Login', name='User', error=error_message)
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    error_message = None
+    success_message = None
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        try:
+            response = SupabaseHandler().do_signup(email, password)
+
+            if response.status_code == 200:
+                data = response.json()
+                session['access_token'] = data['access_token']  # Store the token in session
+                success_message = "Signup successful! Redirecting to the dashboard..."
+                return redirect(url_for('dashboard'))
+            elif response.status_code == 400:
+                error_message = response.json().get('error', 'Invalid input. Please try again.')
+            else:
+                error_message = "Something went wrong. Please try again later."
+        except Exception as e:
+            error_message = f"An error occurred: {str(e)}"
+
+    return render_template('signup.html', error=error_message, success=success_message)
 
 
 @app.route("/logout")
@@ -43,23 +90,23 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        response = SupabaseHandler().do_signup(email, password)
-
-        print(response)
-
-        if response.status_code == 200:
-            data = response.json()
-            session['access_token'] = data['access_token']  # Store the token in session
-            return redirect(url_for('dashboard'))
-        else:
-            return "Invalid credentials, please try again."
-
-    return render_template('signup.html')
+# @app.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     if request.method == 'POST':
+#         email = request.form['email']
+#         password = request.form['password']
+#         response = SupabaseHandler().do_signup(email, password)
+#
+#         print(response)
+#
+#         if response.status_code == 200:
+#             data = response.json()
+#             session['access_token'] = data['access_token']  # Store the token in session
+#             return redirect(url_for('dashboard'))
+#         else:
+#             return "Invalid credentials, please try again."
+#
+#     return render_template('signup.html')
 
 
 if __name__ == '__main__':

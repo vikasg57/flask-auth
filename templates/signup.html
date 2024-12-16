@@ -67,6 +67,14 @@
 <body>
     <div class="signup-container">
         <h2>Create Account</h2>
+        <div class="messages">
+            {% if error %}
+            <p style="color: red;">{{ error }}</p>
+            {% endif %}
+            {% if success %}
+            <p style="color: green;">{{ success }}</p>
+            {% endif %}
+        </div>
         <form action="{{ url_for('signup') }}" method="POST">
             <div class="form-group">
                 <label for="email">Email</label>
