@@ -8,6 +8,12 @@ app = Flask(__name__)
 app.secret_key = "flask_secret"  # Replace with a secure key
 
 
+@app.route("/")
+def homepage():
+    return render_template("homepage.html")
+
+
+
 @app.route("/dashboard")
 def dashboard():
     if "access_token" in session:
