@@ -49,14 +49,15 @@ def signup():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
 
         try:
             response = SupabaseHandler().do_signup(email, password)
-
-            print(response)
-
             if response.get('session') and response.get('session').get('access_token'):
-                session['access_token'] = response['session']['access_token']  # Store the token in session
+                access_token = response['session']['access_token']
+                session['access_token'] = access_token  # Store the token in session
+                response = ApiHandler().create_customer(access_token, first_name, last_name, email, password)
                 success_message = "Signup successful! Redirecting to the dashboard..."
                 return redirect(url_for('dashboard'))
             else:

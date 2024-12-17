@@ -13,10 +13,16 @@ class ApiHandler:
             'Authorization': f'Bearer {access_token}'
         }
 
-    def validate_access_token(self, access_token):
-        response = requests.get(
-            url=self.get_backend_url() + 'v1/validate-token',
+    def create_customer(self, access_token, first_name, last_name, email, password):
+        response = requests.post(
+            url=self.get_backend_url() + 'v1/customers',
             headers=self.headers(access_token),
+            data={
+                'password': password,
+                'email': email,
+                'first_name': first_name,
+                'last_name': last_name
+            },
             verify=False
         )
         print(response)
