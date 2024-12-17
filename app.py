@@ -57,7 +57,10 @@ def signup():
             if response.get('session') and response.get('session').get('access_token'):
                 access_token = response['session']['access_token']
                 session['access_token'] = access_token  # Store the token in session
-                response = ApiHandler().create_customer(access_token, first_name, last_name, email, password)
+                try:
+                    ApiHandler().create_customer(access_token, first_name, last_name, email, password)
+                except Exception as e:
+                    print(f"Error creating customer: {str(e)}")
                 success_message = "Signup successful! Redirecting to the dashboard..."
                 return redirect(url_for('dashboard'))
             else:
