@@ -31,3 +31,5 @@ class SupabaseHandler:
             }
         )
         return json.loads(response.json())
+
+
